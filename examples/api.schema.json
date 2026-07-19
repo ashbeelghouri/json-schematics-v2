@@ -1,0 +1,21 @@
+{
+  "version": "2.0",
+  "global": {
+    "headers": [
+      { "target": "authorization", "required": true, "validate": [ { "rule": "notEmpty" } ] }
+    ]
+  },
+  "endpoints": [
+    {
+      "path": "/users/:id",
+      "method": "POST",
+      "query": [
+        { "target": "verbose", "validate": [ { "rule": "inOptions", "args": { "options": ["true", "false"] } } ] }
+      ],
+      "body": [
+        { "target": "email", "required": true, "validate": [ { "rule": "email" } ] },
+        { "target": "age", "validate": [ { "rule": "isNumber" }, { "rule": "positive" } ] }
+      ]
+    }
+  ]
+}

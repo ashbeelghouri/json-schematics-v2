@@ -1,0 +1,47 @@
+{
+  "version": "2.0",
+  "separator": ".",
+  "locale": "en",
+  "db": { "minNameLength": 2 },
+  "fields": [
+    {
+      "target": "user.profile.name",
+      "name": "name",
+      "displayName": "Full name",
+      "type": "string",
+      "required": true,
+      "addToDB": true,
+      "validate": [
+        { "rule": "isString" },
+        { "rule": "minLength", "args": { "min": 2 }, "message": "name is too short", "messages": { "ar": "الاسم قصير جدا" } }
+      ],
+      "operate": [ { "op": "trim" }, { "op": "capitalize" } ]
+    },
+    {
+      "target": "user.profile.last",
+      "when": [ { "condition": "fieldPresent", "args": { "field": "user.profile.name" } } ],
+      "validate": [ { "rule": "isString" }, { "rule": "minLength", "args": { "min": 2 } } ],
+      "operate": [ { "op": "capitalize" } ]
+    },
+    {
+      "target": "user.profile.age",
+      "required": true,
+      "validate": [
+        { "rule": "isNumber" },
+        { "rule": "between", "args": { "min": 0, "max": 120 }, "message": "age must be 0-120" }
+      ]
+    },
+    {
+      "target": "user.profile.email",
+      "dependsOn": [ "user.profile.name" ],
+      "validate": [ { "rule": "email" } ]
+    },
+    {
+      "target": "user.tags",
+      "validate": [
+        { "rule": "minItems", "args": { "min": 1 } },
+        { "rule": "unique" }
+      ]
+    }
+  ]
+}

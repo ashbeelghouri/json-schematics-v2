@@ -1,0 +1,11 @@
+{
+  "user": {
+    "profile": {
+      "name": "  ashbeel  ",
+      "last": "ghouri",
+      "age": 30,
+      "email": "ashbeel@example.com"
+    },
+    "tags": ["go", "json", "schema"]
+  }
+}
