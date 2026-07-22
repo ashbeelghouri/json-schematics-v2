@@ -1,17 +1,36 @@
 # json-schematics-v2
 
-Validate and transform arbitrary JSON in Go using a small, declarative schema.
+[![Go Reference](https://pkg.go.dev/badge/github.com/ashbeelghouri/json-schematics-v2.svg)](https://pkg.go.dev/github.com/ashbeelghouri/json-schematics-v2)
+[![Go Report Card](https://goreportcard.com/badge/github.com/ashbeelghouri/json-schematics-v2)](https://goreportcard.com/report/github.com/ashbeelghouri/json-schematics-v2)
+[![CI](https://github.com/ashbeelghouri/json-schematics-v2/actions/workflows/ci.yml/badge.svg)](https://github.com/ashbeelghouri/json-schematics-v2/actions/workflows/ci.yml)
+[![MIT License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+
+**Validate and transform arbitrary JSON in Go using a small, declarative schema — with no third-party dependencies.**
+
+> 📖 Full documentation, live examples, and an interactive playground:
+> **[jsonschematics.ashbeelghouri.com](https://jsonschematics.ashbeelghouri.com)**
 
 visit [jsonschematics.ashbeelghouri.com](https://jsonschematics.ashbeelghouri.com) for more detailed documentation.
 
 `json-schematics-v2` flattens any document into dotted keys (`user.profile.name`,
 `tags.0`), lets each schema field target one or more of those keys (literally,
 with a `*` wildcard, or with a regular expression), and runs every matched value
-through an ordered chain of **validators** and **operators**. It has **no
-third-party dependencies**.
+through an ordered chain of **validators** and **operators**.
 
 This is a ground-up redesign of the original `jsonschematics`. See
 [MIGRATION.md](MIGRATION.md) for what changed and why.
+
+## Features
+
+- 🎯 **Target anything** — match flattened keys literally, with a `*` wildcard, or a full regex.
+- 🧩 **Batteries included** — 41 validators, 12 operators, and 3 conditions built in.
+- 🛡️ **Never panics** — wrong types return typed errors; unknown rule names are caught up front by `Check()`.
+- 🌍 **Localized errors** — per-locale messages and format templates; `ValidationError` marshals to clean JSON.
+- ⚙️ **Validate _and_ transform** — a separate operator pass, plus a shared context DB for cross-field logic.
+- 🌐 **HTTP request validation** — validate headers, query, and body per endpoint.
+- 📦 **Zero dependencies** — standard library only, Go 1.24+.
+
+## Install
 
 ```sh
 go get github.com/ashbeelghouri/json-schematics-v2@latest
@@ -220,7 +239,8 @@ Endpoint paths support `:name` (one segment) and a trailing `*` wildcard. See
 ## Examples
 
 Runnable schema and data live in [`examples/`](examples/). The package-level
-`Example` in the tests loads them end to end.
+`Example` in the tests loads them end to end. Try any schema live in the
+[playground](https://jsonschematics.ashbeelghouri.com/playground).
 
 ## Development
 
