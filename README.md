@@ -2,6 +2,8 @@
 
 Validate and transform arbitrary JSON in Go using a small, declarative schema.
 
+visit [jsonschematics.ashbeelghouri.com](https://jsonschematics.ashbeelghouri.com) for more detailed documentation.
+
 `json-schematics-v2` flattens any document into dotted keys (`user.profile.name`,
 `tags.0`), lets each schema field target one or more of those keys (literally,
 with a `*` wildcard, or with a regular expression), and runs every matched value
