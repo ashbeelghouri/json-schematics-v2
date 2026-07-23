@@ -37,6 +37,34 @@ func (s *Schematics) ValidateCtx(ctx context.Context, data any) error {
 	return nil
 }
 
+// ValidateBytes parses raw JSON data bytes and validates them against the
+// loaded schema, saving the caller a manual json.Unmarshal before calling
+// Validate. isArray tells it whether to parse b as a single JSON object
+// (false) or as an array of objects (true) — pass it explicitly rather than
+// relying on shape-sniffing, so a payload that doesn't match the expected
+// shape fails with a clear parse error instead of silently going through
+// Validate's try-object-then-array fallback.
+func (s *Schematics) ValidateBytes(b []byte, isArray bool) error {
+	return s.ValidateBytesCtx(context.Background(), b, isArray)
+}
+
+// ValidateBytesCtx is ValidateBytes with a caller-supplied context.Context,
+// made available to every rule via Context.Ctx.
+func (s *Schematics) ValidateBytesCtx(ctx context.Context, b []byte, isArray bool) error {
+	if isArray {
+		var arr []map[string]any
+		if err := json.Unmarshal(b, &arr); err != nil {
+			return fmt.Errorf("data is not a valid JSON array: %w", err)
+		}
+		return s.ValidateCtx(ctx, arr)
+	}
+	var obj map[string]any
+	if err := json.Unmarshal(b, &obj); err != nil {
+		return fmt.Errorf("data is not a valid JSON object: %w", err)
+	}
+	return s.ValidateCtx(ctx, obj)
+}
+
 // normalize converts arbitrary input into either a single object or a slice of
 // objects by round-tripping through JSON.
 func normalize(data any) (map[string]any, []map[string]any, error) {

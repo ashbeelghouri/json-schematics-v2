@@ -104,6 +104,25 @@ func New(opts ...Option) *Schematics {
 	return s
 }
 
+// ImportSchema is a convenience constructor for callers who start from raw
+// schema bytes (a config file already read into memory, a network response,
+// an embedded fixture): it combines New and LoadBytes into one call.
+//
+//	s, err := schematics.ImportSchema(schemaBytes)
+//	if err != nil {
+//	    log.Fatal(err)
+//	}
+//
+// Any options are applied the same way they are for New, before the schema
+// is loaded.
+func ImportSchema(b []byte, opts ...Option) (*Schematics, error) {
+	s := New(opts...)
+	if err := s.LoadBytes(b); err != nil {
+		return nil, err
+	}
+	return s, nil
+}
+
 // SetSchema installs a schema value directly.
 func (s *Schematics) SetSchema(schema Schema) *Schematics {
 	s.schema = schema
