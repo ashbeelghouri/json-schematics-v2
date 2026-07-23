@@ -69,6 +69,28 @@ if err := s.Validate(data); err != nil {
 
 Use `errors.As` to tell them apart.
 
+### Working with raw bytes
+
+`ImportSchema` and `ValidateBytes` skip the manual `json.Unmarshal` step when
+you already have schema and data as `[]byte` — a config file, a request body,
+an embedded fixture:
+
+```go
+s, err := schematics.ImportSchema(schemaBytes) // New + LoadBytes in one call
+if err != nil {
+    log.Fatal(err)
+}
+
+// isArray tells ValidateBytes whether dataBytes is a single JSON object or
+// an array of objects — pass it explicitly instead of relying on shape-
+// sniffing, so a mismatched payload fails with a clear parse error.
+if err := s.ValidateBytes(dataBytes, false /* isArray */); err != nil {
+    // *ValidationErrors, *SchemaError, or a JSON parse error
+}
+```
+
+`ValidateBytesCtx` takes a `context.Context` the same way `ValidateCtx` does.
+
 ## The schema
 
 ```json
