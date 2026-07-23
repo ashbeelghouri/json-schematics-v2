@@ -10,8 +10,6 @@
 > 📖 Full documentation, live examples, and an interactive playground:
 > **[jsonschematics.ashbeelghouri.com](https://jsonschematics.ashbeelghouri.com)**
 
-visit [jsonschematics.ashbeelghouri.com](https://jsonschematics.ashbeelghouri.com) for more detailed documentation.
-
 `json-schematics-v2` flattens any document into dotted keys (`user.profile.name`,
 `tags.0`), lets each schema field target one or more of those keys (literally,
 with a `*` wildcard, or with a regular expression), and runs every matched value
@@ -25,6 +23,7 @@ This is a ground-up redesign of the original `jsonschematics`. See
 - 🎯 **Target anything** — match flattened keys literally, with a `*` wildcard, or a full regex.
 - 🧩 **Batteries included** — 41 validators, 12 operators, and 3 conditions built in.
 - 🛡️ **Never panics** — wrong types return typed errors; unknown rule names are caught up front by `Check()`.
+- 🔍 **Catches target typos** — `ValidateSchema()` matches every field's target against sample data, so a typo like `"target": "mane"` fails your tests instead of silently matching nothing in production.
 - 🌍 **Localized errors** — per-locale messages and format templates; `ValidationError` marshals to clean JSON.
 - ⚙️ **Validate _and_ transform** — a separate operator pass, plus a shared context DB for cross-field logic.
 - 🌐 **HTTP request validation** — validate headers, query, and body per endpoint.
@@ -216,6 +215,53 @@ if errors.As(err, &ve) {
 
 Format tokens: `%message`, `%target`, `%rule` (alias `%validator`), `%value`,
 `%id`. Each `*ValidationError` also marshals to a stable JSON object.
+
+## Catching target typos before they ship
+
+Because a schema is data, not code, a typo in a field's `target` doesn't fail
+to compile — it just quietly matches nothing at runtime. `Check()` (run
+automatically before every `Validate`) catches a typo in a JSON *key*, like
+`"tagret"` instead of `"target"`: `encoding/json` drops the unrecognized key,
+`Target` ends up `""`, and `Check` reports `"field #N has an empty target"`.
+
+A typo in the target's *value* — `"target": "mane"` instead of `"name"` — is a
+perfectly valid string, so `Check` alone has nothing to flag. `ValidateSchema`
+closes that gap by matching every target against a sample of your real data:
+
+```go
+s := schematics.New()
+s.LoadFile("schema.json")
+
+sample := map[string]any{"name": "Ada", "email": "ada@example.com"}
+if err := s.ValidateSchema(sample); err != nil {
+    log.Fatal(err) // *SchemaError: field #0: target "mane" does not match anything in the sample data
+}
+```
+
+Run it once in a test alongside a fixture (or a golden payload) so schema/data
+drift fails CI instead of failing silently in production:
+
+```go
+func TestSchemaMatchesFixture(t *testing.T) {
+    s := schematics.New()
+    if err := s.LoadFile("schema.json"); err != nil {
+        t.Fatal(err)
+    }
+    if err := s.ValidateSchema(loadFixture(t)); err != nil {
+        t.Fatal(err) // schema drifted from the real payload shape — fix the typo
+    }
+}
+```
+
+If a field is legitimately optional and absent from every fixture you have,
+pass its target to `ignoreTargets` so it isn't flagged:
+
+```go
+s.ValidateSchema(sample, "user.profile.middleName")
+```
+
+`ValidateSchema` runs every check `Check` does, so it also still catches
+unknown rule/operator/condition names and duplicate targets.
 
 ## HTTP request validation
 
